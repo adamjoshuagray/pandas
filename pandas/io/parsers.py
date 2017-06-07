@@ -1649,6 +1649,12 @@ class CParserWrapper(ParserBase):
 
         if self.usecols:
             usecols = _evaluate_usecols(self.usecols, self.orig_names)
+
+            # GH 14671
+            if (self.usecols_dtype == 'string' and
+                    not set(usecols).issubset(self.orig_names)):
+                raise ValueError("Usecols do not match names.")
+
             if len(self.names) > len(usecols):
                 self.names = [n for i, n in enumerate(self.names)
                               if (i in usecols or n in usecols)]
@@ -2205,7 +2211,7 @@ class PythonParser(ParserBase):
     def get_chunk(self, size=None):
         if size is None:
             size = self.chunksize
-        return self.read(nrows=size)
+        return self.read(rows=size)
 
     def _convert_data(self, data):
         # apply converters
